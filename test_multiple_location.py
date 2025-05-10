@@ -2,8 +2,9 @@ import socketio
 import asyncio
 import random
 
-SERVER_URL = 'http://localhost:8000'
-NUM_CLIENTS = 10
+#SERVER_URL = 'http://localhost:8000'
+SERVER_URL = 'http://37.59.30.197'
+NUM_CLIENTS = 2
 
 # Generate random latitude/longitude around a central point
 def generate_random_location():
@@ -21,19 +22,27 @@ async def simulate_client(user_id: int):
     async def connect():
         print(f'✅ [User {user_id}] Connected')
 
-    @sio.event
-    async def disconnect():
-        print(f'🔌 [User {user_id}] Disconnected')
-
-    try:
-        await sio.connect(SERVER_URL, transports=['websocket'])
+        # Send initial location
         latitude, longitude = generate_random_location()
         await sio.emit('update_location', {
             'user_id': user_id,
             'latitude': latitude,
             'longitude': longitude
         })
-        await asyncio.sleep(random.uniform(0.5, 2))  # simulate activity delay
+
+    @sio.event
+    async def disconnect():
+        print(f'🔌 [User {user_id}] Disconnected')
+
+    @sio.on('user_location_update')
+    async def on_user_location_update(data):
+        if data['user_id'] != user_id:
+            print(f'📍 [User {user_id}] Received location of User {data["user_id"]}: '
+                  f'({data["latitude"]}, {data["longitude"]})')
+
+    try:
+        await sio.connect(SERVER_URL, transports=['websocket'])
+        await asyncio.sleep(10)  # Keep the client active to listen for others
     except Exception as e:
         print(f'❌ [User {user_id}] Error: {e}')
     finally:

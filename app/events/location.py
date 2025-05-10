@@ -30,15 +30,24 @@ def register_location_events(sio):
                                data["user_id"],
                                data["latitude"],
                                data["longitude"])
+
+            #create location payload
+            location_payload ={
+                "user_id": data["user_id"],
+                "latitude": data["latitude"],
+                "longitude": data["longitude"]
+            }
             #emit the success acknowledgement
             await sio.emit('location_updated',
                            {
-                               "user_id": data["user_id"],
-                               "latitude" : data["latitude"],
-                               "longitude" : data["longitude"],
-                               "status" : "received"
+                               **location_payload,
+                               "status": "received"
                            }
                            ,to=sid)
+
+            #Broadcast to all other connected users except this
+            await sio.emit('user_location_update',
+                           location_payload,skip_sid=sid)
 
         except Exception as ex:
             print(f"Error while saving {data["user_id"]} location to database, details are :{ex}")
