@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>WebRTC Walkie Talkie</title>
+</head>
+<body>
+  <h1>WebRTC Audio</h1>
+  <button id="startMic">🎤 Start Walkie Talkie</button>
+  <!--button onclick="start()">Start</button-->
+  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+  <script src="/static/js/walkie_talkie.js"></script>
+  <!--script>
+    const socket = io("http://localhost:8000", { transports: ["websocket"] });
+    let pc = new RTCPeerConnection();
+
+    async function start() {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach(track => pc.addTrack(track, stream));
+
+      pc.onicecandidate = (e) => {
+        if (e.candidate) {
+          socket.emit("ice_candidate", { to: "receiver", candidate: e.candidate });
+        }
+      };
+
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+      socket.emit("offer", { to: "receiver", offer });
+    }
+
+    socket.on("answer", async (data) => {
+      await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+    });
+
+    socket.on("ice_candidate", async (data) => {
+      await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+    });
+  </script-->
+</body>
+</html>
